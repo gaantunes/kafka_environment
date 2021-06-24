@@ -3,25 +3,25 @@ package consumer
 import (
 	"context"
 	"fmt"
-	"github.com/Shopify/sarama"
 	"log"
 	"os"
+
+	"github.com/Shopify/sarama"
 )
 
 var (
-	kafkaBrokers = []string{"localhost:9093"}
-	kafkaTopics = []string{"sarama_topic"}
-	consumerGroupID =  "sarama_consumer"
+	kafkaTopics     = []string{"sarama_topic"}
+	consumerGroupID = "sarama_consumer"
 )
 
-func StartConsumer() {
+func StartConsumer(kafkaUris []string) {
 	// Init config, specify appropriate version
 	config := sarama.NewConfig()
 	sarama.Logger = log.New(os.Stderr, "[sarama_logger]", log.LstdFlags)
 	config.Version = sarama.V2_1_0_0
 
 	// Start with a client
-	client, err := sarama.NewClient(kafkaBrokers, config)
+	client, err := sarama.NewClient(kafkaUris, config)
 	if err != nil {
 		panic(err)
 	}
@@ -48,6 +48,7 @@ func StartConsumer() {
 		handler := ConsumerGroupHandler{}
 
 		err := group.Consume(ctx, kafkaTopics, handler)
+
 		if err != nil {
 			panic(err)
 		}

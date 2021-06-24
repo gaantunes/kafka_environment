@@ -1,8 +1,7 @@
 package main
 
 import (
-	"flag"
-	"fmt"
+	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/RonnanSouza/kafka_environment/consumer"
 	"github.com/RonnanSouza/kafka_environment/producer"
@@ -10,24 +9,21 @@ import (
 
 func main() {
 
-	// Flags
-	consumerFlagValue := flag.Bool("c", false, "    Use this flag to start a Kafka Consumer")
-	producerFlagValue := flag.Bool("p", false, "    Use this flag to start a Kafka Producer")
-	stringFlagValue := flag.String("a", "", "    Use this flag with either \"consumer\" or \"producer\"")
+	var (
+		isConsumer = kingpin.Flag("consumer", "Use this flag to start a Kafka Consumer.").Default("false").Bool()
+		isProducer = kingpin.Flag("producer", "Use this flag to start a Kafka Producer.").Default("false").Bool()
+		kafkaURIs  = []string{}
+	)
 
-	// Flag Processing
-	flag.Parse()
+	kingpin.Flag("kafka.server", "Address (host:port) of Kafka server.").Required().StringsVar(&kafkaURIs)
+
+	kingpin.HelpFlag.Short('h')
+	kingpin.Parse()
 
 	// Decision Time
-	if *producerFlagValue == true {
-		producer.StartProducer()
-	} else if *consumerFlagValue == true {
-		consumer.StartConsumer()
-	} else if *stringFlagValue == "consumer" {
-		consumer.StartConsumer()
-	} else if *stringFlagValue == "producer" {
-		producer.StartProducer()
-	} else {
-		fmt.Print("Usage: \n -c     Use this flag to start a Kafka Consumer\n -p     Use this flag to start a Kafka Producer\n -a     Use this flag with either \"consumer\" or \"producer\"\n")
+	if *isProducer {
+		producer.StartProducer(kafkaURIs)
+	} else if *isConsumer {
+		consumer.StartConsumer(kafkaURIs)
 	}
 }

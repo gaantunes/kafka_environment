@@ -12,15 +12,14 @@ import (
 )
 
 var (
-	kafkaBrokers = []string{"localhost:9093"}
-	KafkaTopic   = "sarama_topic"
-	enqueued     int
+	KafkaTopic = "sarama_topic"
+	enqueued   int
 )
 
 // StartProducer runs the AsyncProducer
-func StartProducer() {
+func StartProducer(kafkaUris []string) {
 
-	producer, err := setupProducer()
+	producer, err := setupProducer(kafkaUris)
 	if err != nil {
 		panic(err)
 	} else {
@@ -37,10 +36,10 @@ func StartProducer() {
 }
 
 // setupProducer will create a AsyncProducer and returns it
-func setupProducer() (sarama.AsyncProducer, error) {
+func setupProducer(kafkaUris []string) (sarama.AsyncProducer, error) {
 	config := sarama.NewConfig()
 	sarama.Logger = log.New(os.Stderr, "[sarama_logger]", log.LstdFlags)
-	return sarama.NewAsyncProducer(kafkaBrokers, config)
+	return sarama.NewAsyncProducer(kafkaUris, config)
 }
 
 // produceMessages will send 'testing 123' to KafkaTopic each second, until receive a os signal to stop e.g. control + c
